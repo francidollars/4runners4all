@@ -1,20 +1,30 @@
 from furl import furl
+from enum import Enum
 
-from model.user import User
 from model.model import db
+from model.user import User
+# from model.searchentry import SearchEntry
 
-class UrlList( furl ) :
+class ValidUrl( Enum ) :
+    CRAIGSLIST = furl(url="https://www.craigslist.org/", path="search/sites/"),
+    FACEBOOK = furl(url="https://www.facebook.com/", path="marketplace/"),
+    PICKNPULL = furl(url="https://www.picknpull.com/", path="check-inventory/")
 
-    def __init__( self,
-                  furl
+    def __repr__( self ) ->furl :
+
+        return self
+
+    def __str__( self ) ->str :
+
+        return str(self.value)
 
 def main( argv = None ) -> None :
-    db.connect()
-    db.create_tables([User])
+    urls = []
+    urls.append(ValidUrl.CRAIGSLIST)
 
-    u = User.create(emailAddress="mfdoyle17@gmail.com")
+    print(urls)
 
-    db.close()
+    return 0
 
 if __name__ == "__main__":
     main()

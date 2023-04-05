@@ -20,3 +20,5 @@ class User( BaseModel ) :
     def emailAddress( self,
                       emailAddress ) :
         self._emailAddress = emailAddress
+
+User._meta.database.create_tables(User)

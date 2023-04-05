@@ -1,13 +1,14 @@
 from datetime import datetime
 from datetime import date
 from furl import furl
-from peewee import Field, AutoField, CharField, DateField, DateTimeField, IntegerField
+from peewee import Field, AutoField, CharField, DateField, DateTimeField, ForeignKeyField, IntegerField
 from playhouse import hybrid
 
 from .model import BaseModel
+from .user import User
 
-class UrlField( Field ) :
-    field_type = 'UrlList'
+class UrlField( CharField ) :
+    field_type = 'urllist'
 
     def db_value( self,
                   value ) -> str :
@@ -17,13 +18,8 @@ class UrlField( Field ) :
         if isinstance(value, furl):
 
             return value.url
-        try:
-
-            return furl(value).url
-        except:
-
-            return value
-
+        try: return furl(value).url
+        except: return value
 
     def python_value( self,
                       value ) :
@@ -34,12 +30,12 @@ class UrlField( Field ) :
         return furl.url(value) if value is not None else None
 
 class SearchEntry( BaseModel ) :
-    search_entry_id = AutoField()
+    user = ForeignKeyField(User, backref = "searchentry")
     _yearRange = DateField()
     _make = CharField()
     _model = CharField()
     _dateTimePosted = DateTimeField()
-    _zipcode = IntegerField()
+    _zipcode = IntegerField()           # See uszipcodes
     _radius = IntegerField()
     _url = UrlField()
 
@@ -86,3 +82,25 @@ class SearchEntry( BaseModel ) :
     def dateTimePosted( self,
               dateTimePosted ) :
         self._dateTimePosted = dateTimePosted
+
+    @hybrid.hybrid_property
+    def zipcode( self ) -> int :
+
+        return self._zipcode
+
+    @zipcode.setter
+    def zipcode( self,
+                 zipcode ) :
+        self._zipcode = zipcode
+
+    @hybrid.hybrid_property
+    def radius( self ) -> int :
+
+        return self._radius
+
+    @radius.setter
+    def radius( self,
+                radius ) :
+        self._radius = radius
+
+SearchEntry._meta.database.create_tables(SearchEntry)
