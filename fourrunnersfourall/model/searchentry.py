@@ -1,43 +1,39 @@
 from datetime import datetime
 from datetime import date
+from enum import Enum
+
 from furl import furl
 from peewee import Field, AutoField, CharField, DateField, DateTimeField, ForeignKeyField, IntegerField
 from playhouse import hybrid
+import tldextract
 
 from .model import BaseModel
-from .user import User
 
-class UrlField( CharField ) :
-    field_type = 'urllist'
+class ValidUrl( Enum ) :
+    BRINGATRAILER = furl(url="https://www.bringatrailer.com/"),
+    CRAIGSLIST = furl(url="https://www.craigslist.org/", path="search/sites/"),
+    FACEBOOK = furl(url="https://www.facebook.com/", path="marketplace/"),
+    PICKNPULL = furl(url="https://www.picknpull.com/", path="check-inventory/")
 
-    def db_value( self,
-                  value ) -> str :
-        if isinstance(value, str):
+class Url( ) :
+    def __init__( self,
+                  url: str ) :
+        _fUrl = furl(url)
 
-            return value
-        if isinstance(value, furl):
+    def subDomain( self ) -> str :
 
-            return value.url
-        try: return furl(value).url
-        except: return value
-
-    def python_value( self,
-                      value ) :
-        if isinstance(value, furl.url):
-
-            return value
-
-        return furl.url(value) if value is not None else None
+        return _extractResult
 
 class SearchEntry( BaseModel ) :
-    user = ForeignKeyField(User, backref = "searchentry")
+    searchentry_id = AutoField()
+    _emailAddress = CharField()
     _yearRange = DateField()
     _make = CharField()
     _model = CharField()
     _dateTimePosted = DateTimeField()
-    _zipcode = IntegerField()           # See uszipcodes
+    _zipcode = IntegerField()   # zipcodes
     _radius = IntegerField()
-    _url = UrlField()
+    _url = CharField()
 
     def __str__( self ) -> str :
 
@@ -60,7 +56,7 @@ class SearchEntry( BaseModel ) :
 
     @make.setter
     def make( self,
-              make ) :
+              make: str ) :
         self._make = make
 
     @hybrid.hybrid_property
@@ -70,7 +66,7 @@ class SearchEntry( BaseModel ) :
 
     @model.setter
     def model( self,
-               model ) :
+               model: str ) :
         self._model = model
 
     @hybrid.hybrid_property
@@ -80,7 +76,7 @@ class SearchEntry( BaseModel ) :
 
     @dateTimePosted.setter
     def dateTimePosted( self,
-              dateTimePosted ) :
+              dateTimePosted: datetime ) :
         self._dateTimePosted = dateTimePosted
 
     @hybrid.hybrid_property
@@ -90,7 +86,7 @@ class SearchEntry( BaseModel ) :
 
     @zipcode.setter
     def zipcode( self,
-                 zipcode ) :
+                 zipcode: int ) :
         self._zipcode = zipcode
 
     @hybrid.hybrid_property
@@ -100,7 +96,18 @@ class SearchEntry( BaseModel ) :
 
     @radius.setter
     def radius( self,
-                radius ) :
+                radius: int) :
         self._radius = radius
 
-SearchEntry._meta.database.create_tables(SearchEntry)
+    @hybrid.hybrid_property
+    def url( self ) -> str :
+
+        return self._url
+
+    @url.setter
+    def url( self,
+             url: str ) :
+
+        self._url = url
+
+SearchEntry._meta.database.create_tables([SearchEntry])

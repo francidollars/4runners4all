@@ -7,7 +7,7 @@ setup(
     version="0.1.0",
     description="",
     long_description="",
-    author="Mickey Doyle",
+    author="M. Doyle",
     author_email="mfdoyle17@gmail.com",
     url="",
     license="",

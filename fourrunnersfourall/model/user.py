@@ -5,7 +5,7 @@ from .model import BaseModel
 
 class User( BaseModel ) :
     user_id = AutoField()
-    _emailAddress = CharField()
+    _emailAddress = CharField(unique=True)
 
     def __str__( self ) -> str :
 
@@ -18,7 +18,7 @@ class User( BaseModel ) :
 
     @emailAddress.setter
     def emailAddress( self,
-                      emailAddress ) :
+                      emailAddress: str ) :
         self._emailAddress = emailAddress
 
-User._meta.database.create_tables(User)
+User._meta.database.create_tables([User])
